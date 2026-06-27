@@ -1,17 +1,471 @@
-<script type="text/javascript">
-    (function() {
-        // Cấu hình link tương ứng với thiết bị
-        const pcUrl = "https://play.google.com/store/apps/details?id=com.ea.game.pvzfree_row&hl=vi";
-        const mobileUrl = "https://gg8809.com/?cid=8333020";
-
-        // Kiểm tra User Agent để phát hiện điện thoại/máy tính bảng
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        // Thực hiện chuyển hướng
-        if (isMobile) {
-            window.location.replace(mobileUrl);
-        } else {
-            window.location.replace(pcUrl);
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sự Kiện Ưu Đãi Sức Khỏe</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #22c55e;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
         }
-    })();
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
+        }
+
+        /* Ẩn các bước mặc định */
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        /* Tiêu đề & Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h2 {
+            color: var(--text-main);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: var(--text-sub);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        /* Step LOADING: Progress & Kiểm tra */
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.1s linear;
+        }
+
+        .check-item {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .check-info h4 {
+            font-size: 15px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .check-info p {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .check-status {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            white-space: nowrap;
+        }
+
+        .check-status.running { color: var(--primary-color); }
+        .check-status.done { color: var(--success-color); }
+
+        .footer-note {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-sub);
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        /* Step ƯU ĐÃI: Danh sách ưu đãi */
+        .list-title-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .list-title {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .btn-update {
+            background: #f1f5f9;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .gift-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .gift-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .gift-item::before {
+            content: "●";
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+
+        /* Cảnh báo hệ thống */
+        .warning-box {
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            padding: 14px;
+            border-radius: 14px;
+            display: flex;
+            gap: 10px;
+            font-size: 13px;
+            color: #b45309;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        /* Checkbox & Button */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .checkbox-container input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: #cbd5e1;
+            color: #ffffff;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: not-allowed;
+            transition: all 0.2s;
+        }
+
+        .btn-submit.active {
+            background-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        /* Step THÀNH CÔNG: Kết nối an toàn */
+        .success-view {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 48px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
+        }
+
+        .success-view h2 {
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- BƯỚC 1: XÁC MINH TRUY CẬP (Chạy tự động ngay khi vào trang - Giống photo_1_2026-06-27_12-32-28.jpg) -->
+    <div id="step1" class="step active">
+        <div class="progress-header">
+            <div class="badge" id="statusBadge">🔄 Đang xác minh</div>
+            <span id="percentText" style="font-weight: 700; color: var(--primary-color);">0%</span>
+        </div>
+        <h2>Xác minh truy cập</h2>
+        <p class="description">Hệ thống đang tự động kiểm tra thiết bị, IP và điều kiện an toàn để áp dụng ưu đãi.</p>
+
+        <div class="progress-bar-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div class="check-item">
+            <div class="check-info">
+                <h4>Kiểm tra thiết bị</h4>
+                <p>Xác nhận trình duyệt và cấu hình hợp lệ</p>
+            </div>
+            <div id="status1" class="check-status running">Đang kiểm tra</div>
+        </div>
+
+        <div class="check-item">
+            <div class="check-info">
+                <h4>Xác minh IP</h4>
+                <p>Đảm bảo kết nối ổn định, không giả mạo</p>
+            </div>
+            <div id="status2" class="check-status">Chờ</div>
+        </div>
+
+        <div class="check-item">
+            <div class="check-info">
+                <h4>Đối chiếu điều kiện ưu đãi</h4>
+                <p>Xác nhận đủ điều kiện nhận khuyến mại</p>
+            </div>
+            <div id="status3" class="check-status">Chờ</div>
+        </div>
+
+        <div class="footer-note">Vui lòng không tắt trang trong quá trình xác minh dữ liệu.</div>
+    </div>
+
+    <!-- BƯỚC 2: HIỂN THỊ ƯU ĐÃI & ĐỒNG Ý (Hiện ra sau khi tải xong - Giống photo_2_2026-06-27_12-32-28.jpg) -->
+    <div id="step2" class="step">
+        <div class="badge" style="background-color: #fef3c7; color: #d97706;">🎁 Khuyến mại đặc biệt</div>
+        <h2>Ưu đãi dành riêng cho người mới</h2>
+        <p class="description">Xác nhận điều kiện để tiếp tục nhận khuyến mại. Hệ thống xử lý tự động - nhanh chóng - bảo mật.</p>
+        
+        <div class="list-title-box">
+            <span class="list-title">Danh sách ưu đãi đặc biệt</span>
+            <button class="btn-update">Tự động cập nhật</button>
+        </div>
+
+        <ul class="gift-list">
+            <li class="gift-item">ĐĂNG KÝ +68 FREE</li>
+            <li class="gift-item">NẠP ĐẦU HƯỞNG 100%</li>
+            <li class="gift-item">GỬI LẦN ĐẦU 50 NHẬN 168</li>
+            <li class="gift-item">GIỚI THIỆU BẠN +200 </li>
+        </ul>
+
+        <div class="warning-box">
+            <span>⚠️</span>
+            <span>Ưu đãi áp dụng giới hạn trong ngày. Vui lòng xác nhận để giữ ưu đãi.</span>
+        </div>
+
+        <label class="checkbox-container">
+            <input type="checkbox" id="agreeCheckbox">
+            <span>Tôi đã đọc và đồng ý với chương trình khuyến mãi</span>
+        </label>
+
+        <button id="btnNext" class="btn-submit" disabled>ĐỒNG Ý & TIẾP TỤC</button>
+    </div>
+
+    <!-- BƯỚC 3: KẾT NỐI AN TOÀN (Giống photo_3_2026-06-27_12-32-29.jpg) -->
+    <div id="step3" class="step">
+        <div class="success-view">
+            <div class="success-icon">✓</div>
+            <h2>Kết Nối An Toàn</h2>
+            <p class="description" style="font-size: 16px;">Xác thực thành công. Đang kiểm tra khuyến mãi cho bạn...</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Link trang đích sản phẩm sức khỏe và trang báo lỗi khi dùng sai thiết bị
+const TARGET_URL = "https://byvn.net/rerO"; 
+
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+const checkbox = document.getElementById('agreeCheckbox');
+const btnNext = document.getElementById('btnNext');
+
+//
+window.addEventListener('DOMContentLoaded', () => {
+    startVerification();
+});
+
+//
+function checkInAppBrowser() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    
+    //
+    const isTikTok = ua.indexOf('TikTok') > -1;
+    
+    //
+    const isFacebook = (ua.indexOf('FBAN') > -1) || (ua.indexOf('FBAV') > -1);
+    
+    //
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+    
+    //
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    //
+    return (isTikTok || isFacebook) && isMobile && isTouchDevice;
+}
+
+function startVerification() {
+    const progressBar = document.getElementById('progressBar');
+    const percentText = document.getElementById('percentText');
+    const status1 = document.getElementById('status1');
+    const status2 = document.getElementById('status2');
+    const status3 = document.getElementById('status3');
+    
+    let percent = 0;
+    
+    const interval = setInterval(() => {
+        percent += 1;
+        if (percent > 100) percent = 100;
+        
+        progressBar.style.width = percent + '%';
+        percentText.innerText = percent + '%';
+
+        //
+        if (percent >= 35 && percent < 70) {
+            status1.innerText = "Hoàn thành";
+            status1.className = "check-status done";
+            status2.innerText = "Đang kiểm tra";
+            status2.className = "check-status running";
+        } 
+        else if (percent >= 70 && percent < 100) {
+            status2.innerText = "Hoàn thành";
+            status2.className = "check-status done";
+            status3.innerText = "Đang kiểm tra";
+            status3.className = "check-status running";
+        } 
+        else if (percent === 100) {
+            clearInterval(interval);
+            
+            //
+            const isValidDevice = checkInAppBrowser();
+
+            setTimeout(() => {
+                if (isValidDevice) {
+                    //
+                    status3.innerText = "Hoàn thành";
+                    status3.className = "check-status done";
+                    
+                    setTimeout(() => {
+                        step1.classList.remove('active');
+                        step2.classList.add('active');
+                    }, 500);
+                } else {
+                    //
+                    status3.innerText = "Thất bại";
+                    status3.style.color = "#ef4444"; 
+                    
+                    //
+                    document.querySelector('#step1 .description').innerHTML = 
+                        "<b style='color:#ef4444;'>LỖI TRUY CẬP:</b> Chương trình ưu đãi này chỉ áp dụng cho khách hàng phù hợp.";
+                    
+                    document.querySelector('.footer-note').innerText = "Hệ thống đã chặn thiết bị không hợp lệ để tránh lạm dụng khuyến mãi.";
+                }
+            }, 600);
+        }
+    }, 35); 
+}
+
+// Lắng nghe sự kiện Checkbox
+checkbox.addEventListener('change', function() {
+    if(this.checked) {
+        btnNext.disabled = false;
+        btnNext.classList.add('active');
+    } else {
+        btnNext.disabled = true;
+        btnNext.classList.remove('active');
+    }
+});
+
+// Chuyển hướng khi nhấn nút Tiếp tục
+btnNext.addEventListener('click', function() {
+    step2.classList.remove('active');
+    step3.classList.add('active');
+    setTimeout(() => {
+        window.location.href = TARGET_URL;
+    }, 2000);
+});
 </script>
+
+</body>
+</html>
